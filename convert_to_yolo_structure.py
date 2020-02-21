@@ -62,7 +62,7 @@ for k,v in data_list:
     data_array[k].append(v)
 
 for k,v in tqdm(data_array.items()):
-    file_path = os.path.join('labels/', str(k).replace(IMAGE_TYPE,"txt"))
+    file_path = os.path.join('labels/', str(k).replace(IMAGE_TYPE,".txt"))
     fl=open(file_path, "w")
     fl.write((",".join(map(str,v))).replace(",","").replace("[","").replace("(","").replace("]","").replace(")","\n"))
     fl.close()
