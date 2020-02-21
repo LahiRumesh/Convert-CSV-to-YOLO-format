@@ -67,10 +67,10 @@ for k,v in tqdm(data_array.items()):
     fl.write((",".join(map(str,v))).replace(",","").replace("[","").replace("(","").replace("]","").replace(")","\n"))
     fl.close()
 
-file = open(CLASSES_NAMES,"w") 
+classes_file = open(CLASSES_NAMES,"w") 
 for elem in SortedLabelDict:
-	file.write(elem[0]+'\n') 
-file.close() 
+	classes_file.write(elem[0]+'\n') 
+classes_file.close() 
 
 images=np.array(images)
 x_train ,x_test = train_test_split(images,test_size=TEST_SIZE) 
