@@ -3,17 +3,9 @@ import numpy as np
 from collections import defaultdict
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
-import os.path
+import os
+import argparse
 
-IMAGE_HEIGHT=512
-IMAGE_WIDTH=512
-IMAGE_TYPE=".jpg"
-CLASSES_NAMES='classes.txt'
-INPUT_CSV_FILE="data1.csv"
-TEST_SIZE=0.2
-IMAGE_FOLDER="data/custom/images/"
-TRAIN_DATA_FILE="train.txt"
-TEST_DATA_FILE="val.txt"
 
 #calculate x & y width
 def calRange(valMax,valMin,valImg):
@@ -30,7 +22,22 @@ def combine_lists(l1,l2):
     return list(map(lambda x,y:(x,y), l1,l2)) 
 
 
-csv_read=pd.read_csv(INPUT_CSV_FILE)
+parser=argparse.ArgumentParser()
+parser.add_argument("--INPUT_CSV_FILE", type=str, default="input.csv", help="Input CSV file name")
+parser.add_argument("--IMAGE_HEIGHT", type=int, default=512, help="Image height")
+parser.add_argument("--IMAGE_WIDTH", type=int, default=512, help="Image width")
+parser.add_argument("--IMAGE_TYPE", type=str, default=".jpg", help="Image type(.jpg | .png)")
+parser.add_argument("--CLASSES_NAMES", type=str, default="classes.txt", help="classes file name")
+parser.add_argument("--IMAGE_FOLDER", type=str, default="data/custom/images/", help="path to Image Folder")
+parser.add_argument("--TRAIN_DATA_FILE", type=str, default="train.txt", help="Training Images set")
+parser.add_argument("--TEST_DATA_FILE", type=str, default="valid.txt", help="Testing Images set")
+parser.add_argument("--LABEL_FOLDER", type=str, default="labels", help="Labels folder")
+parser.add_argument("--TEST_SIZE", type=float, default=0.1, help="Testing size from the data set")
+
+args = parser.parse_args()
+
+
+csv_read=pd.read_csv(args.INPUT_CSV_FILE)
 images=csv_read['image'].tolist()
 labels_list = csv_read['label']
 xmin=csv_read['xmin']
@@ -42,10 +49,10 @@ labels = labels_list.unique()
 labeldict = dict(zip(labels,range(len(labels))))
 SortedLabelDict = sorted(labeldict.items() ,  key=lambda x: x[1])
 
-x_width=calRange(xmax,xmin,IMAGE_WIDTH).tolist()
-y_height=calRange(ymax,ymin,IMAGE_HEIGHT).tolist()
-x_cord=calCordinate(xmax,xmin,IMAGE_WIDTH).tolist()
-y_cord=calCordinate(ymax,ymin,IMAGE_HEIGHT).tolist()
+x_width=calRange(xmax,xmin,args.IMAGE_WIDTH).tolist()
+y_height=calRange(ymax,ymin,args.IMAGE_HEIGHT).tolist()
+x_cord=calCordinate(xmax,xmin,args.IMAGE_WIDTH).tolist()
+y_cord=calCordinate(ymax,ymin,args.IMAGE_HEIGHT).tolist()
 
 data_label=[]
 for i in labels_list:
@@ -57,31 +64,33 @@ for i in labels_list:
 data_values=combine_multiple_lists(data_label,x_cord,y_cord,x_width,y_height)
 data_list=combine_lists(images,data_values)
 
+os.mkdir(args.LABEL_FOLDER)
+
 data_array=defaultdict(list)
 for k,v in data_list:
     data_array[k].append(v)
 
 for k,v in tqdm(data_array.items()):
-    file_path = os.path.join('labels/', str(k).replace(IMAGE_TYPE,".txt"))
+    file_path = os.path.join(args.LABEL_FOLDER, str(k).replace(args.IMAGE_TYPE,".txt"))
     fl=open(file_path, "w")
     fl.write((",".join(map(str,v))).replace(",","").replace("[","").replace("(","").replace("]","").replace(")","\n"))
     fl.close()
 
-classes_file = open(CLASSES_NAMES,"w") 
+classes_file = open(args.CLASSES_NAMES,"w") 
 for elem in SortedLabelDict:
 	classes_file.write(elem[0]+'\n') 
 classes_file.close() 
 
 images=np.array(images)
-x_train ,x_test = train_test_split(images,test_size=TEST_SIZE) 
+x_train ,x_test = train_test_split(images,test_size=args.TEST_SIZE) 
 
-train_file = open(TRAIN_DATA_FILE,"w") 
+train_file = open(args.TRAIN_DATA_FILE,"w") 
 for data in x_train:
-	train_file.write(IMAGE_FOLDER+data+'\n') 
+	train_file.write(args.IMAGE_FOLDER+data+'\n') 
 train_file.close() 
 
-test_file = open(TEST_DATA_FILE,"w") 
+test_file = open(args.TEST_DATA_FILE,"w") 
 for data in x_test:
-	test_file.write(IMAGE_FOLDER+data+'\n') 
+	test_file.write(args.IMAGE_FOLDER+data+'\n') 
 test_file.close() 
 
