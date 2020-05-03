@@ -5,6 +5,9 @@ Testing Version - work in progress
 In YOLO image data store in a text file(img.txt) file for the corresponding image(img.jpg) in the same directory.
 each text file include with  object-class x y width height for each object in line. 
 
+Where :
+object-class=integer number of object from 0 to (classes-1)
+x,y,width,height=float values relative to width and height of image, it can be equal from (0.0 to 1.0]
 
 CSV data fomat :
 
